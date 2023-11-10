@@ -1,23 +1,49 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
-import {IEAS, Attestation, AttestationRequest, AttestationRequestData} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
-import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
+import {IEAS} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+import {Attestation} from "@ethereum-attestation-service/eas-contracts/contracts/Common.sol";
 
 contract EASVerification {
     IEAS public eas;
-    ISchemaRegistry public schemaRegistry;
 
-    constructor(IEAS _eas, ISchemaRegistry _schemaRegistry) {
+    constructor(IEAS _eas) {
         eas = _eas;
-        schemaRegistry = _schemaRegistry;
     }
 
-    bytes32 constant SCHEMA_UID =
-        0xca6982c2ce55a0b1689a1beaa39593b35b66874f4b5fae6f5c429030e29846d4;
+    function getPassportAttestation(
+        bytes32 uid,
+        address caller
+    ) public view returns (uint256 score) {
+        // check if attestation exists
+        require(eas.isAttestationValid(uid), "Attestation is not valid");
 
-    function verify(bytes32 _uid) public view returns (SchemaRecord memory) {
-        SchemaRecord memory record = schemaRegistry.getSchema(_uid);
+        Attestation memory attestation = eas.getAttestation(uid);
+        // check if caller is the recipient of the attestation
+        require(
+            attestation.recipient == caller,
+            "Caller is not the recipient of the attestation"
+        );
+        bytes memory encodedData = attestation.data;
+        score = decodeScore(encodedData);
 
-        return record;
+        // check if score is valid on core contract
+        // just return score
+        return score;
+    }
+
+    function decodeScore(
+        bytes memory encodedData
+    ) internal pure returns (uint256 decodedScore) {
+        uint256 score;
+        uint32 scorer_id;
+        uint8 score_decimals;
+
+        (score, scorer_id, score_decimals) = abi.decode(
+            encodedData,
+            (uint256, uint32, uint8)
+        );
+
+        decodedScore = score / 10 ** 18;
+        return decodedScore;
     }
 }
