@@ -6,15 +6,10 @@ import {IPoolContract} from "./interface/IPoolContract.sol";
 import {QF} from "./libraries/QF.sol";
 import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
 import {PledgePostERC721} from "./PledgePostERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-// TODO: add on-chain verification of Gitcoin passport with EAS Attestation
-// schema UID(OP): 0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89
-// https://docs.passport.gitcoin.co/building-with-passport/contract-reference
 contract PledgePost is AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     struct Article {
         uint256 id;
         address payable author;
@@ -123,6 +118,10 @@ contract PledgePost is AccessControl {
         _setupRole(ADMIN_ROLE, _admin);
     }
 
+    function checkAdminRole(address _admin) external view returns (bool) {
+        return hasRole(ADMIN_ROLE, _admin);
+    }
+
     function removeAdmin(address _admin) external {
         require(msg.sender == owner, "Only owner can call this function.");
         revokeRole(ADMIN_ROLE, _admin);
@@ -143,6 +142,20 @@ contract PledgePost is AccessControl {
         emit ArticlePosted(msg.sender, _content, articleId);
 
         return articleId;
+    }
+
+    function updateArticle(uint256 _articleId, string memory _content) public {
+        require(
+            msg.sender == authorArticles[msg.sender][_articleId].author,
+            "Only author can update article"
+        );
+        require(bytes(_content).length > 0, "Content cannot be empty");
+        require(
+            _articleId < authorArticles[msg.sender].length,
+            "Article does not exist"
+        );
+        Article storage article = authorArticles[msg.sender][_articleId];
+        article.content = _content;
     }
 
     function donateToArticle(
@@ -246,6 +259,8 @@ contract PledgePost is AccessControl {
         return poolAddress;
     }
 
+    // TODO: add matching cap
+    // TODO:
     function createRound(
         string memory _name,
         string memory _description,

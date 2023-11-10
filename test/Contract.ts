@@ -35,9 +35,11 @@ describe("Contract Test", () => {
 
     it("should donate", async () => {
       await contract.postArticle("test");
-      const donation = { value: 100 };
+      const donation = { value: ethers.parseEther("100") };
       await contract.connect(addr1).donateToArticle(owner.address, 0, donation);
-      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(100);
+      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
+        ethers.parseEther("100")
+      );
       expect(
         await contract.checkOwner(addr1.address, owner.address, 0)
       ).to.equal(true);
@@ -83,6 +85,10 @@ describe("Contract Test", () => {
       const poolbalance = await provider.getBalance(round.poolAddress);
       expect(poolbalance).to.equal(ethers.parseEther("100"));
     });
+    it("should add role", async () => {
+      await contract.addAdmin(addr1.address);
+      expect(await contract.checkAdminRole(addr1.address)).to.equal(true);
+    });
   });
   describe("QF related tests", () => {
     it("total donation should be 100", async () => {
@@ -95,10 +101,12 @@ describe("Contract Test", () => {
       await contract.activateRound(1);
       await contract.postArticle("test");
 
-      await contract.donateToArticle(owner.address, 0, {
-        value: 100,
+      await contract.connect(addr1).donateToArticle(owner.address, 0, {
+        value: ethers.parseEther("100"),
       });
-      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(100);
+      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
+        ethers.parseEther("100")
+      );
     });
     it("should donate within round", async () => {
       await contract.createRound(
@@ -108,24 +116,28 @@ describe("Contract Test", () => {
         1702101663
       );
       await contract.postArticle("test");
-      await contract.donateToArticle(owner.address, 0, {
-        value: 100,
+      await contract.connect(addr1).donateToArticle(owner.address, 0, {
+        value: ethers.parseEther("100"),
       });
       await contract.activateRound(1);
       await contract.applyForRound(1, 0);
-      await contract.donateToArticle(owner.address, 0, {
-        value: 100,
+      await contract.connect(addr1).donateToArticle(owner.address, 0, {
+        value: ethers.parseEther("100"),
       });
-      const sqrt100 = await contract.getSquareRoot(100);
+      const sqrt100 = await contract.getSquareRoot(ethers.parseEther("100"));
 
-      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(200);
+      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
+        ethers.parseEther("200")
+      );
       expect(
         await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
       ).to.equal(sqrt100);
       await contract
         .connect(addr1)
-        .donateToArticle(owner.address, 0, { value: 100 });
-      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(300);
+        .donateToArticle(owner.address, 0, { value: ethers.parseEther("100") });
+      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
+        ethers.parseEther("300")
+      );
       expect(
         await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
       ).to.equal(sqrt100 + sqrt100);
