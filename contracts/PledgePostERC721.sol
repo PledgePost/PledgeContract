@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -54,18 +54,18 @@ contract PledgePostERC721 is
         address minterAddress,
         address authorAddress,
         uint256 articleId,
-        string memory description
+        bytes calldata contentURI
     ) external onlyOwner returns (uint256) {
         require(minterAddress != address(0), "Minter address is zero");
         require(authorAddress != address(0), "Author address is zero");
-        require(bytes(description).length > 0, "Description is empty");
+        require(contentURI.length > 0, "ContentURI is empty");
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter += 1;
         _safeMint(minterAddress, tokenId);
 
         TokenData storage tokenData = _tokenData[tokenId];
         tokenData.minterAddress = minterAddress;
-        tokenData.description = description;
+        tokenData.contentURI = contentURI;
         tokenData.authorAddress = authorAddress;
         tokenData.articleId = articleId;
 
@@ -115,7 +115,7 @@ contract PledgePostERC721 is
             '{"name": "PledgePost Donation NFT #',
             tokenId.toString(),
             '", "description": "',
-            tokenData.description,
+            tokenData.contentURI,
             '", "image": "',
             imageUrl,
             '", "attributes": [',

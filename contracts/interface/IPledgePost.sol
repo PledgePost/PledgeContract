@@ -1,23 +1,22 @@
 // // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 interface IPledgePost {
     struct Article {
         uint256 id;
         address payable author;
-        string content; // IPFS hash
+        bytes content; // IPFS hash
         uint256 donationsReceived;
     }
     struct Round {
         uint256 id;
         address owner;
-        string name;
+        bytes name;
         bytes description;
         address payable poolAddress;
         uint256 poolAmount;
         uint256 startDate;
         uint256 endDate;
-        uint256 createdTimestamp;
         bool isActive;
     }
     enum ApplicationStatus {
@@ -27,7 +26,7 @@ interface IPledgePost {
     }
     event ArticlePosted(
         address indexed author,
-        string content,
+        bytes content,
         uint256 articleId
     );
     event ArticleDonated(
@@ -40,7 +39,7 @@ interface IPledgePost {
         address indexed owner,
         address ipoolAddress,
         uint256 roundId,
-        string name,
+        bytes name,
         uint256 startDate,
         uint256 endDate
     );
@@ -56,7 +55,7 @@ interface IPledgePost {
         uint256 amount
     );
 
-    function initialize(address _owner, address _nftcontract) external;
+    function initialize(address _owner) external;
 
     function addAdmin(address _admin) external;
 
@@ -64,9 +63,12 @@ interface IPledgePost {
 
     function removeAdmin(address _admin) external;
 
-    function postArticle(string memory _content) external returns (uint256);
+    function postArticle(bytes calldata _content) external;
 
-    function updateArticle(uint256 _articleId, string memory _content) external;
+    function updateArticle(
+        uint256 _articleId,
+        bytes calldata _content
+    ) external;
 
     function donateToArticle(
         address payable _author,
@@ -88,11 +90,11 @@ interface IPledgePost {
     ) external;
 
     function createRound(
-        string memory _name,
-        string memory _description,
+        bytes calldata _name,
+        bytes calldata _description,
         uint256 _startDate,
         uint256 _endDate
-    ) external returns (Round memory);
+    ) external;
 
     function activateRound(uint256 _roundId) external;
 
@@ -112,13 +114,6 @@ interface IPledgePost {
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) external view returns (uint256);
-
-    function getEstimatedAmount(
-        uint256 _roundId,
-        address _author,
-        uint256 _articleId,
-        uint256 _amount
     ) external view returns (uint256);
 
     function getAllocation(
@@ -152,14 +147,7 @@ interface IPledgePost {
 
     function getRound(uint256 _roundId) external view returns (Round memory);
 
-    function getAllRound() external view returns (Round[] memory);
-
-    function getDonatedAmount(
-        address _author,
-        uint256 _articleId
-    ) external view returns (uint256);
-
-    function getRecievedDonationsWithinRound(
+    function getSqrtSumRoundDonation(
         address _author,
         uint256 _articleId,
         uint256 _roundId
