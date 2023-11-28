@@ -36,13 +36,6 @@ async function main() {
   const ContractFactory = await ethers.getContractFactory("PledgePost");
   const contract = await ContractFactory.deploy({ nonce: deployNonce });
   console.log(`Contract deployed at address: ${contract.target}`);
-
-  // Deploy the ERC20 token
-  // const TokenContractFactory = await ethers.getContractFactory("TestToken");
-  // const tokenContract = await TokenContractFactory.deploy({
-  //   nonce: deployNonce + 1,
-  // });
-  // console.log(`Token deployed at address: ${tokenContract.target}`);
 }
 
 async function setup() {

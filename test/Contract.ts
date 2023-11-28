@@ -130,7 +130,7 @@ describe("Contract Test", () => {
         ethers.parseEther("200")
       );
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100);
       await contract
         .connect(addr1)
@@ -139,7 +139,7 @@ describe("Contract Test", () => {
         ethers.parseEther("300")
       );
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100 + sqrt100);
     });
 
@@ -165,7 +165,7 @@ describe("Contract Test", () => {
       );
       const sqrt100 = await contract.getSquareRoot(ethers.parseEther("100"));
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100);
       await contract
         .connect(addr1)
@@ -174,7 +174,7 @@ describe("Contract Test", () => {
         ethers.parseEther("300")
       );
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100 + sqrt100);
       await contract.deposit(1, { value: ethers.parseEther("100") });
       await contract.Allocate(1);
