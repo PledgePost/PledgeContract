@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 interface IPledgePostERC721 {
     struct TokenData {
         address minterAddress;
         address authorAddress;
         uint256 articleId;
-        string description;
+        bytes contentURI;
         string imageUrl;
     }
 
@@ -29,7 +29,7 @@ interface IPledgePostERC721 {
         address minterAddress,
         address authorAddress,
         uint256 articleId,
-        string calldata description
+        bytes calldata contentURI
     ) external returns (uint256);
 
     function tokenURI(uint256 tokenId) external view returns (string memory);
