@@ -1,33 +1,32 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+// internal contracts
 import {PoolContract} from "./PoolContract.sol";
-import {IPoolContract} from "./interface/IPoolContract.sol";
-import {QF} from "./libraries/QF.sol";
-import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
 import {PledgePostERC721} from "./PledgePostERC721.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {QF} from "./libraries/QF.sol";
 
-contract PledgePost is AccessControl {
+// interfaces
+import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
+import {IPledgePost} from "./interface/IPledgePost.sol";
+import {IPoolContract} from "./interface/IPoolContract.sol";
+
+contract PledgePost is
+    IPledgePost,
+    Initializable,
+    AccessControlUpgradeable,
+    OwnableUpgradeable
+{
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    struct Article {
-        uint256 id;
-        address payable author;
-        string content; // IPFS hash
-        uint256 donationsReceived;
-    }
-    struct Round {
-        uint256 id;
-        address owner;
-        string name;
-        bytes description;
-        address payable poolAddress;
-        uint256 poolAmount;
-        uint256 startDate;
-        uint256 endDate;
-        uint256 createdTimestamp;
-        bool isActive;
-    }
+    uint256 public MINIMUM_AMOUNT = 0.0005 ether;
+    uint256 roundLength = 0;
+
+    IPledgePostERC721 public nft;
+
     // author => articles
     mapping(address => Article[]) public authorArticles;
     // author => totalDonations
@@ -39,12 +38,6 @@ contract PledgePost is AccessControl {
     // author => Article.id => Round
     mapping(address => mapping(uint256 => Round))
         public authorToArticleIdToRound;
-
-    enum ApplicationStatus {
-        Pending,
-        Accepted,
-        Denied
-    }
     // author => Article.id => Round.id => ApplicationStatus
     mapping(address => mapping(uint256 => mapping(uint256 => ApplicationStatus)))
         public applicationStatusForRound;
@@ -56,74 +49,39 @@ contract PledgePost is AccessControl {
     // round.id => author => article.id => amount
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         public matchingAmounts;
+
     // array of rounds
     Round[] public rounds;
-    uint256 roundLength = 0;
-    uint256 constant MINIMUM_AMOUNT = 0.001 ether;
 
-    event ArticlePosted(
-        address indexed author,
-        string content,
-        uint256 articleId
-    );
-    event ArticleDonated(
-        address indexed author,
-        address indexed from,
-        uint256 articleId,
-        uint256 amount
-    );
-    event RoundCreated(
-        address indexed owner,
-        address ipoolAddress,
-        uint256 roundId,
-        string name,
-        uint256 startDate,
-        uint256 endDate
-    );
-    event RoundApplied(
-        address indexed author,
-        uint256 articleId,
-        uint256 roundId
-    );
-    event Allocated(
-        uint256 indexed roundId,
-        address recipient,
-        uint256 articleId,
-        uint256 amount
-    );
+    function initialize(
+        address _owner,
+        address _nftcontract
+    ) public initializer {
+        __Ownable_init(_owner);
+        __AccessControl_init();
+        _grantRole(ADMIN_ROLE, _owner);
 
-    address public owner;
-    IPledgePostERC721 public nft;
-
-    constructor() {
-        owner = msg.sender;
-        _setupRole(ADMIN_ROLE, msg.sender);
-        // TODO: change token URI
-        nft = new PledgePostERC721(
+        nft = IPledgePostERC721(_nftcontract);
+        nft.initialize(
             address(this),
             "https://bafybeiev4tgktvtgo5hjmfukj5p76iw5uyh3bisu7ivk6s4n7mfyrqmvf4.ipfs.dweb.link"
         );
     }
 
-    modifier onlyOwner() {
-        require(
-            msg.sender == owner || hasRole(ADMIN_ROLE, msg.sender),
-            "Only owner or admin can call this function."
-        );
+    modifier onlyAdmin() {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not an admin");
         _;
     }
 
-    function addAdmin(address _admin) external {
-        require(msg.sender == owner, "Only owner can call this function.");
-        _setupRole(ADMIN_ROLE, _admin);
+    function addAdmin(address _admin) external onlyOwner {
+        _grantRole(ADMIN_ROLE, _admin);
     }
 
     function checkAdminRole(address _admin) external view returns (bool) {
         return hasRole(ADMIN_ROLE, _admin);
     }
 
-    function removeAdmin(address _admin) external {
-        require(msg.sender == owner, "Only owner can call this function.");
+    function removeAdmin(address _admin) external onlyOwner {
         revokeRole(ADMIN_ROLE, _admin);
     }
 
@@ -220,7 +178,7 @@ contract PledgePost is AccessControl {
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) external onlyOwner {
+    ) external onlyAdmin {
         require(
             applicationStatusForRound[_author][_articleId][_roundId] ==
                 ApplicationStatus.Pending,
@@ -235,7 +193,7 @@ contract PledgePost is AccessControl {
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) external onlyOwner {
+    ) external onlyAdmin {
         require(
             applicationStatusForRound[_author][_articleId][_roundId] ==
                 ApplicationStatus.Pending,
@@ -260,13 +218,12 @@ contract PledgePost is AccessControl {
     }
 
     // TODO: add matching cap
-    // TODO:
     function createRound(
         string memory _name,
         string memory _description,
         uint256 _startDate,
         uint256 _endDate
-    ) external onlyOwner returns (Round memory) {
+    ) external onlyAdmin returns (Round memory) {
         require(_startDate < _endDate, "Start date must be before end date");
         // require(
         //     _startDate > block.timestamp,
@@ -279,7 +236,7 @@ contract PledgePost is AccessControl {
 
         Round memory newRound = Round({
             id: roundLength + 1,
-            owner: owner,
+            owner: msg.sender,
             name: _name,
             description: description,
             poolAddress: pool,
@@ -302,7 +259,7 @@ contract PledgePost is AccessControl {
         return newRound;
     }
 
-    function activateRound(uint256 _roundId) external onlyOwner {
+    function activateRound(uint256 _roundId) external onlyAdmin {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
 
@@ -312,7 +269,7 @@ contract PledgePost is AccessControl {
         round.isActive = true;
     }
 
-    function deactivateRound(uint256 _roundId) external onlyOwner {
+    function deactivateRound(uint256 _roundId) external onlyAdmin {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
         Round storage round = rounds[_roundId - 1];
@@ -320,7 +277,11 @@ contract PledgePost is AccessControl {
         round.isActive = false;
     }
 
-    function Allocate(uint256 _roundId) external onlyOwner {
+    function changeMinimumAmount(uint256 _amount) external onlyOwner {
+        MINIMUM_AMOUNT = _amount;
+    }
+
+    function Allocate(uint256 _roundId) external onlyAdmin {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
 
