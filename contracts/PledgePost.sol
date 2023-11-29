@@ -25,7 +25,7 @@ contract PledgePost is
     uint256 private MINIMUM_AMOUNT;
     uint256 roundLength;
 
-    IPledgePostERC721 private nft;
+    PledgePostERC721 private nft;
 
     // author => articles
     mapping(address => Article[]) private authorArticles;
@@ -66,11 +66,7 @@ contract PledgePost is
         MINIMUM_AMOUNT = 0.0005 ether;
         roundLength = 0;
 
-        nft = new PledgePostERC721();
-        nft.initialize(
-            address(this),
-            "https://bafybeiev4tgktvtgo5hjmfukj5p76iw5uyh3bisu7ivk6s4n7mfyrqmvf4.ipfs.dweb.link"
-        );
+        nft = new PledgePostERC721(address(this));
     }
 
     modifier onlyAdmin() {
@@ -156,7 +152,7 @@ contract PledgePost is
             );
         }
         emit ArticleDonated(_author, msg.sender, _articleId, msg.value);
-        nft.mint(msg.sender, _author, _articleId, article.content);
+        nft.safeMint(msg.sender, _author, _articleId, article.content);
     }
 
     function applyForRound(uint256 _roundId, uint256 _articleId) external {
