@@ -53,6 +53,12 @@ contract PledgePost is
     // array of rounds
     Round[] private rounds;
 
+    /// @dev see { openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol }
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(address _owner) external initializer {
         // initialize owner of contract
         __Ownable_init(_owner);
