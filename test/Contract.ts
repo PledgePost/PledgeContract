@@ -13,7 +13,9 @@ describe("Contract Test", () => {
 
   async function deployContract() {
     const ContractFactory = await ethers.getContractFactory("PledgePost");
-    const contract = await ContractFactory.deploy();
+    const contract = await upgrades.deployProxy(ContractFactory, [
+      owner.address,
+    ]);
     return contract;
   }
 
@@ -24,17 +26,21 @@ describe("Contract Test", () => {
   });
   describe("Basic functions", () => {
     it("should post article", async () => {
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       expect(await contract.getAuthorArticle(owner.address, 0)).to.deep.equal([
         0,
         owner.address,
-        "test",
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq",
         0,
       ]);
     });
 
     it("should donate", async () => {
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       const donation = { value: ethers.parseEther("100") };
       await contract.connect(addr1).donateToArticle(owner.address, 0, donation);
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
@@ -47,8 +53,10 @@ describe("Contract Test", () => {
 
     it("should create round", async () => {
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
@@ -57,12 +65,16 @@ describe("Contract Test", () => {
 
     it("should apply round", async () => {
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       await contract.activateRound(1);
       await contract.applyForRound(1, 0);
       const round1 = await contract.getRound(1);
@@ -72,13 +84,17 @@ describe("Contract Test", () => {
     });
     it("should deposit", async () => {
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
       await contract.activateRound(1);
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       await contract.applyForRound(1, 0);
       await contract.deposit(1, { value: ethers.parseEther("100") });
       let round = await contract.getRound(1);
@@ -93,13 +109,17 @@ describe("Contract Test", () => {
   describe("QF related tests", () => {
     it("total donation should be 100", async () => {
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
       await contract.activateRound(1);
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
 
       await contract.connect(addr1).donateToArticle(owner.address, 0, {
         value: ethers.parseEther("100"),
@@ -110,12 +130,16 @@ describe("Contract Test", () => {
     });
     it("should donate within round", async () => {
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       await contract.connect(addr1).donateToArticle(owner.address, 0, {
         value: ethers.parseEther("100"),
       });
@@ -130,7 +154,7 @@ describe("Contract Test", () => {
         ethers.parseEther("200")
       );
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100);
       await contract
         .connect(addr1)
@@ -139,20 +163,24 @@ describe("Contract Test", () => {
         ethers.parseEther("300")
       );
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100 + sqrt100);
     });
 
     it("should Allocate", async () => {
       const contract = await deployContract();
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
       await contract.activateRound(1);
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       await contract
         .connect(addr1)
         .donateToArticle(owner.address, 0, { value: ethers.parseEther("100") });
@@ -165,7 +193,7 @@ describe("Contract Test", () => {
       );
       const sqrt100 = await contract.getSquareRoot(ethers.parseEther("100"));
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100);
       await contract
         .connect(addr1)
@@ -174,7 +202,7 @@ describe("Contract Test", () => {
         ethers.parseEther("300")
       );
       expect(
-        await contract.getRecievedDonationsWithinRound(owner.address, 0, 1)
+        await contract.getSqrtSumRoundDonation(owner.address, 0, 1)
       ).to.equal(sqrt100 + sqrt100);
       await contract.deposit(1, { value: ethers.parseEther("100") });
       await contract.Allocate(1);
@@ -186,14 +214,18 @@ describe("Contract Test", () => {
     it("should allocate multiple article", async () => {
       const contract = await deployContract();
       await contract.createRound(
-        "Initial Round",
-        "This is the first round of the PledgePost! Enjoy to write something awesome!",
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
         1699509663,
         1702101663
       );
       await contract.activateRound(1);
       // post articles
-      await contract.postArticle("test");
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
       await contract.connect(addr1).postArticle("addr1");
       await contract.connect(addr2).postArticle("addr2");
       await contract.connect(addr3).postArticle("addr3");

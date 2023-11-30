@@ -1,27 +1,29 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
+
 import {IEAS} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
 import {Attestation} from "@ethereum-attestation-service/eas-contracts/contracts/Common.sol";
 
 contract EASVerification {
     IEAS public eas;
 
+    // _eas is the address of the EAS contract
     constructor(IEAS _eas) {
         eas = _eas;
     }
 
     function getPassportAttestation(
-        bytes32 uid,
-        address caller
+        bytes32 uid, // uid of the attestation
+        address recipient //
     ) public view returns (uint256 score) {
         // check if attestation exists
         require(eas.isAttestationValid(uid), "Attestation is not valid");
 
         Attestation memory attestation = eas.getAttestation(uid);
-        // check if caller is the recipient of the attestation
+        // check if the address is the recipient of the attestation
         require(
-            attestation.recipient == caller,
-            "Caller is not the recipient of the attestation"
+            attestation.recipient == recipient,
+            "Invalid recipient of attestation"
         );
         bytes memory encodedData = attestation.data;
         score = decodeScore(encodedData);

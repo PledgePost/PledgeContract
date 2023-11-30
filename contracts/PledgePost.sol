@@ -1,133 +1,91 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+// internal contracts
 import {PoolContract} from "./PoolContract.sol";
-import {IPoolContract} from "./interface/IPoolContract.sol";
-import {QF} from "./libraries/QF.sol";
-import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
 import {PledgePostERC721} from "./PledgePostERC721.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Sqrt} from "./libraries/Sqrt.sol";
 
-contract PledgePost is AccessControl {
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    struct Article {
-        uint256 id;
-        address payable author;
-        string content; // IPFS hash
-        uint256 donationsReceived;
-    }
-    struct Round {
-        uint256 id;
-        address owner;
-        string name;
-        bytes description;
-        address payable poolAddress;
-        uint256 poolAmount;
-        uint256 startDate;
-        uint256 endDate;
-        uint256 createdTimestamp;
-        bool isActive;
-    }
+// interfaces
+import "./interface/IPledgePost.sol";
+import "./interface/IPoolContract.sol";
+
+contract PledgePost is
+    IPledgePost,
+    Initializable,
+    AccessControlUpgradeable,
+    OwnableUpgradeable
+{
+    bytes32 ADMIN_ROLE;
+    uint256 private MINIMUM_AMOUNT;
+    uint256 roundLength;
+
+    PledgePostERC721 private nft;
+
     // author => articles
-    mapping(address => Article[]) public authorArticles;
+    mapping(address => Article[]) private authorArticles;
     // author => totalDonations
-    mapping(address => uint256) public authorTotalDonations;
+    mapping(address => uint256) private authorTotalDonations;
     // author => articleId => donators
-    mapping(address => mapping(uint256 => address[])) public articleDonators;
+    mapping(address => mapping(uint256 => address[])) private articleDonators;
     // Round.id => Article[]
-    mapping(uint256 => Article[]) public roundArticles;
+    mapping(uint256 => Article[]) private roundArticles;
     // author => Article.id => Round
     mapping(address => mapping(uint256 => Round))
-        public authorToArticleIdToRound;
-
-    enum ApplicationStatus {
-        Pending,
-        Accepted,
-        Denied
-    }
+        private authorToArticleIdToRound;
     // author => Article.id => Round.id => ApplicationStatus
     mapping(address => mapping(uint256 => mapping(uint256 => ApplicationStatus)))
-        public applicationStatusForRound;
+        private applicationStatusForRound;
 
     // author => Article.id => Round.id => uint256
+    // sum of sqrt of donations for each article
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
-        public recievedDonationsWithinRound;
+        private SqrtSumRoundDonation;
 
     // round.id => author => article.id => amount
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
-        public matchingAmounts;
+        private matchingAmounts;
+
     // array of rounds
-    Round[] public rounds;
-    uint256 roundLength = 0;
-    uint256 constant MINIMUM_AMOUNT = 0.001 ether;
+    Round[] private rounds;
 
-    event ArticlePosted(
-        address indexed author,
-        string content,
-        uint256 articleId
-    );
-    event ArticleDonated(
-        address indexed author,
-        address indexed from,
-        uint256 articleId,
-        uint256 amount
-    );
-    event RoundCreated(
-        address indexed owner,
-        address ipoolAddress,
-        uint256 roundId,
-        string name,
-        uint256 startDate,
-        uint256 endDate
-    );
-    event RoundApplied(
-        address indexed author,
-        uint256 articleId,
-        uint256 roundId
-    );
-    event Allocated(
-        uint256 indexed roundId,
-        address recipient,
-        uint256 articleId,
-        uint256 amount
-    );
+    function initialize(address _owner) external initializer {
+        // initialize owner of contract
+        __Ownable_init(_owner);
+        // initialize admin role
+        __AccessControl_init();
+        ADMIN_ROLE = keccak256("ADMIN_ROLE");
+        _grantRole(ADMIN_ROLE, _owner);
 
-    address public owner;
-    IPledgePostERC721 public nft;
+        // initialize variables
+        MINIMUM_AMOUNT = 0.0005 ether;
+        roundLength = 0;
 
-    constructor() {
-        owner = msg.sender;
-        _setupRole(ADMIN_ROLE, msg.sender);
-        // TODO: change token URI
-        nft = new PledgePostERC721(
-            address(this),
-            "https://bafybeiev4tgktvtgo5hjmfukj5p76iw5uyh3bisu7ivk6s4n7mfyrqmvf4.ipfs.dweb.link"
-        );
+        nft = new PledgePostERC721(address(this));
     }
 
-    modifier onlyOwner() {
-        require(
-            msg.sender == owner || hasRole(ADMIN_ROLE, msg.sender),
-            "Only owner or admin can call this function."
-        );
+    modifier onlyAdmin() {
+        require(hasRole(ADMIN_ROLE, msg.sender), "Caller is not an admin");
         _;
     }
 
-    function addAdmin(address _admin) external {
-        require(msg.sender == owner, "Only owner can call this function.");
-        _setupRole(ADMIN_ROLE, _admin);
+    function addAdmin(address _admin) external onlyOwner {
+        _grantRole(ADMIN_ROLE, _admin);
     }
 
     function checkAdminRole(address _admin) external view returns (bool) {
         return hasRole(ADMIN_ROLE, _admin);
     }
 
-    function removeAdmin(address _admin) external {
-        require(msg.sender == owner, "Only owner can call this function.");
+    function removeAdmin(address _admin) external onlyOwner {
         revokeRole(ADMIN_ROLE, _admin);
     }
 
-    function postArticle(string memory _content) public returns (uint256) {
+    function postArticle(string calldata _content) external {
         require(bytes(_content).length > 0, "Content cannot be empty");
         uint articleId = authorArticles[msg.sender].length;
         Article memory newArticle = Article({
@@ -140,11 +98,12 @@ contract PledgePost is AccessControl {
         authorArticles[msg.sender].push(newArticle);
 
         emit ArticlePosted(msg.sender, _content, articleId);
-
-        return articleId;
     }
 
-    function updateArticle(uint256 _articleId, string memory _content) public {
+    function updateArticle(
+        uint256 _articleId,
+        string calldata _content
+    ) external {
         require(
             msg.sender == authorArticles[msg.sender][_articleId].author,
             "Only author can update article"
@@ -187,11 +146,12 @@ contract PledgePost is AccessControl {
         // if yes, add amount
         Round storage round = authorToArticleIdToRound[_author][_articleId];
         if (round.id >= 0 && round.isActive) {
-            recievedDonationsWithinRound[_author][_articleId][round.id] += QF
-                .sqrt(msg.value);
+            SqrtSumRoundDonation[_author][_articleId][round.id] += Sqrt.sqrt(
+                msg.value
+            );
         }
         emit ArticleDonated(_author, msg.sender, _articleId, msg.value);
-        nft.mint(msg.sender, _author, _articleId, article.content);
+        nft.safeMint(msg.sender, _author, _articleId, article.content);
     }
 
     function applyForRound(uint256 _roundId, uint256 _articleId) external {
@@ -220,12 +180,7 @@ contract PledgePost is AccessControl {
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) external onlyOwner {
-        require(
-            applicationStatusForRound[_author][_articleId][_roundId] ==
-                ApplicationStatus.Pending,
-            "Application status is not Pending"
-        );
+    ) external onlyAdmin {
         applicationStatusForRound[_author][_articleId][
             _roundId
         ] = ApplicationStatus.Accepted;
@@ -235,7 +190,7 @@ contract PledgePost is AccessControl {
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) external onlyOwner {
+    ) external onlyAdmin {
         require(
             applicationStatusForRound[_author][_articleId][_roundId] ==
                 ApplicationStatus.Pending,
@@ -247,7 +202,7 @@ contract PledgePost is AccessControl {
     }
 
     function _createPool(
-        string memory _name,
+        bytes calldata _name,
         uint256 _startDate,
         uint256 _endDate
     ) internal returns (address payable poolAddress) {
@@ -260,13 +215,12 @@ contract PledgePost is AccessControl {
     }
 
     // TODO: add matching cap
-    // TODO:
     function createRound(
-        string memory _name,
-        string memory _description,
+        bytes calldata _name,
+        bytes calldata _description,
         uint256 _startDate,
         uint256 _endDate
-    ) external onlyOwner returns (Round memory) {
+    ) external onlyAdmin {
         require(_startDate < _endDate, "Start date must be before end date");
         // require(
         //     _startDate > block.timestamp,
@@ -275,18 +229,15 @@ contract PledgePost is AccessControl {
         require(_endDate > block.timestamp, "End date must be in the future");
 
         address payable pool = _createPool(_name, _startDate, _endDate);
-        bytes memory description = abi.encodePacked(_description);
-
         Round memory newRound = Round({
             id: roundLength + 1,
-            owner: owner,
+            owner: msg.sender, // TODO: change round owner
             name: _name,
-            description: description,
+            description: _description,
             poolAddress: pool,
             poolAmount: 0,
             startDate: _startDate,
             endDate: _endDate,
-            createdTimestamp: block.timestamp,
             isActive: false
         });
         rounds.push(newRound);
@@ -299,20 +250,18 @@ contract PledgePost is AccessControl {
             _endDate
         );
         roundLength++;
-        return newRound;
     }
 
-    function activateRound(uint256 _roundId) external onlyOwner {
+    function activateRound(uint256 _roundId) external onlyAdmin {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
-
         Round storage round = rounds[_roundId - 1];
         require(!round.isActive, "Round is already active");
         require(round.endDate > block.timestamp, "Round has ended");
         round.isActive = true;
     }
 
-    function deactivateRound(uint256 _roundId) external onlyOwner {
+    function deactivateRound(uint256 _roundId) external onlyAdmin {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
         Round storage round = rounds[_roundId - 1];
@@ -320,30 +269,33 @@ contract PledgePost is AccessControl {
         round.isActive = false;
     }
 
-    function Allocate(uint256 _roundId) external onlyOwner {
+    function changeMinimumAmount(uint256 _amount) external onlyOwner {
+        MINIMUM_AMOUNT = _amount;
+    }
+
+    // get sum of sqrt x
+    // get squared sum of sqrt x
+    // calculate matching pool * suquare sum of sqrt donation / total squared sum of donations
+    function Allocate(uint256 _roundId) external onlyAdmin {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
 
-        Round storage round = rounds[_roundId - 1];
-        uint256 totalSquareSqrtSum = 0;
-        // calculate totalSquareSqrtSum
-        totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
+        Round memory round = getRound(_roundId);
         // calculate matching for each article
         require(roundArticles[_roundId].length > 0, "No articles in round");
         for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
             Article storage article = roundArticles[_roundId][i];
-            uint256 suquareSqrtSum = recievedDonationsWithinRound[
-                article.author
-            ][article.id][_roundId] ** 2;
-            uint256 matching = (round.poolAmount * suquareSqrtSum) /
-                totalSquareSqrtSum;
+            uint256 matching = getMatchingAmount(
+                _roundId,
+                article.author,
+                article.id
+            );
             matchingAmounts[_roundId][article.author][article.id] = matching;
             // transfer matching to author address if matching > 0
             if (matching > 0) {
                 bool transferSuccessful = IPoolContract(round.poolAddress)
                     .poolTransfer(article.author, matching);
                 require(transferSuccessful, "Allocation transfer failed");
-
                 emit Allocated(_roundId, article.author, article.id, matching);
             }
         }
@@ -372,9 +324,11 @@ contract PledgePost is AccessControl {
         for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
             require(roundArticles[_roundId].length > 0, "No articles in round");
             Article storage article = roundArticles[_roundId][i];
-            uint256 sqrtSum = recievedDonationsWithinRound[article.author][
-                article.id
-            ][_roundId];
+            uint256 sqrtSum = getSqrtSumRoundDonation(
+                article.author,
+                article.id,
+                _roundId
+            );
             totalSquareSqrtSum += sqrtSum ** 2;
         }
         return totalSquareSqrtSum;
@@ -385,112 +339,36 @@ contract PledgePost is AccessControl {
         address _author,
         uint256 _articleId
     ) public view returns (uint256) {
-        require(_roundId <= roundLength, "Round does not exist");
-        require(_roundId > 0, "RoundId 0 does not exist");
-        require(
-            _articleId < authorArticles[_author].length,
-            "Article does not exist"
-        );
-        require(
-            authorToArticleIdToRound[_author][_articleId].id == _roundId,
-            "Author has not applied for this round"
-        );
         uint256 totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
-        uint256 suquareSqrtSum = recievedDonationsWithinRound[_author][
-            _articleId
-        ][_roundId] ** 2;
+        uint256 suquareSqrtSum = getSqrtSumRoundDonation(
+            _author,
+            _articleId,
+            _roundId
+        ) ** 2;
         Round storage round = rounds[_roundId - 1];
         uint256 matching = (round.poolAmount * suquareSqrtSum) /
             totalSquareSqrtSum;
         return matching;
     }
 
-    function getEstimatedAmount(
-        uint256 _roundId,
-        address _author,
-        uint256 _articleId,
-        uint256 _amount
-    ) public view returns (uint256) {
-        Round storage round = rounds[_roundId - 1];
-        uint256 totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
-        uint256 sqrtSum = recievedDonationsWithinRound[_author][_articleId][
-            _roundId
-        ];
-        uint256 newSquareSqrtSum = (sqrtSum + QF.sqrt(_amount)) ** 2;
-        uint256 oldMatching = getMatchingAmount(_roundId, _author, _articleId);
-
-        uint256 newMatching = (round.poolAmount * newSquareSqrtSum) /
-            totalSquareSqrtSum;
-        return newMatching - oldMatching;
-    }
-
     function getAllocation(
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) public view returns (uint256) {
-        require(_roundId <= roundLength, "Round does not exist");
-        require(_roundId > 0, "RoundId 0 does not exist");
-        require(
-            _articleId < authorArticles[_author].length,
-            "Article does not exist"
-        );
-        require(
-            authorToArticleIdToRound[_author][_articleId].id == _roundId,
-            "Author has not applied for this round"
-        );
-
+    ) external view returns (uint256) {
         return matchingAmounts[_roundId][_author][_articleId];
     }
 
-    function getSquareRoot(uint256 x) public pure returns (uint256) {
-        return QF.sqrt(x);
+    function getSquareRoot(uint256 x) external pure returns (uint256) {
+        return Sqrt.sqrt(x);
     }
 
     function getAppliedArticle(
         uint256 _roundId,
         uint256 _index
-    ) public view returns (Article memory) {
+    ) external view returns (Article memory) {
         require(roundArticles[_roundId].length > 0, "No articles in round");
         return roundArticles[_roundId][_index];
-    }
-
-    function getAuthorArticle(
-        address _author,
-        uint256 _articleId
-    ) public view returns (Article memory) {
-        return authorArticles[_author][_articleId];
-    }
-
-    function getAllAuthorArticle(
-        address _author
-    ) public view returns (Article[] memory) {
-        return authorArticles[_author];
-    }
-
-    function getAppliedRound(
-        address _author,
-        uint256 _articleId
-    ) public view returns (Round memory) {
-        require(
-            _articleId < authorArticles[_author].length,
-            "Article does not exist"
-        );
-        return authorToArticleIdToRound[_author][_articleId];
-    }
-
-    function getRoundLength() public view returns (uint256) {
-        return roundLength;
-    }
-
-    function getRound(uint256 _roundId) public view returns (Round memory) {
-        require(_roundId <= roundLength, "Round does not exist");
-        require(_roundId > 0, "RoundId 0 does not exist");
-        return rounds[_roundId - 1];
-    }
-
-    function getAllRound() public view returns (Round[] memory) {
-        return rounds;
     }
 
     function getDonatedAmount(
@@ -504,39 +382,47 @@ contract PledgePost is AccessControl {
         return authorArticles[_author][_articleId].donationsReceived;
     }
 
-    function getRecievedDonationsWithinRound(
+    function getAuthorArticle(
+        address _author,
+        uint256 _articleId
+    ) external view returns (Article memory) {
+        return authorArticles[_author][_articleId];
+    }
+
+    function getAllAuthorArticle(
+        address _author
+    ) external view returns (Article[] memory) {
+        return authorArticles[_author];
+    }
+
+    function getAppliedRound(
+        address _author,
+        uint256 _articleId
+    ) external view returns (Round memory) {
+        return authorToArticleIdToRound[_author][_articleId];
+    }
+
+    function getRoundLength() external view returns (uint256) {
+        return roundLength;
+    }
+
+    function getRound(uint256 _roundId) public view returns (Round memory) {
+        return rounds[_roundId - 1];
+    }
+
+    function getSqrtSumRoundDonation(
         address _author,
         uint256 _articleId,
         uint256 _roundId
     ) public view returns (uint256) {
-        require(_roundId <= roundLength, "Round does not exist");
-        require(_roundId > 0, "RoundId 0 does not exist");
-        require(
-            _articleId < authorArticles[_author].length,
-            "Article does not exist"
-        );
-        require(
-            authorToArticleIdToRound[_author][_articleId].id == _roundId,
-            "Author has not applied for this round"
-        );
-        return recievedDonationsWithinRound[_author][_articleId][_roundId];
+        return SqrtSumRoundDonation[_author][_articleId][_roundId];
     }
 
     function getApplicationStatus(
         uint256 _roundId,
         address _author,
         uint256 _articleId
-    ) public view returns (ApplicationStatus) {
-        require(_roundId <= roundLength, "Round does not exist");
-        require(_roundId > 0, "RoundId 0 does not exist");
-        require(
-            _articleId < authorArticles[_author].length,
-            "Article does not exist"
-        );
-        require(
-            authorToArticleIdToRound[_author][_articleId].id == _roundId,
-            "Author has not applied for this round"
-        );
+    ) external view returns (ApplicationStatus) {
         return applicationStatusForRound[_author][_articleId][_roundId];
     }
 
@@ -545,10 +431,6 @@ contract PledgePost is AccessControl {
         address _author,
         uint256 _articleId
     ) public view returns (bool) {
-        require(
-            _articleId < authorArticles[_author].length,
-            "Article does not exist"
-        );
         return nft.checkOwner(_sender, _author, _articleId);
     }
 }
