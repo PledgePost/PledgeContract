@@ -1,0 +1,873 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x6f378148fA263Ad64250494E257057Ec0B2226CC",
+    "txHash": "0x3678c7a9e142d0d7c7555fca0e4ec1a7fabec418c2c3cd41d6e9039291b9d8b7"
+  },
+  "proxies": [
+    {
+      "address": "0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0",
+      "txHash": "0xec2fe391fcf1b69c7bacd262324c5445242543fafdab56510f20ca123f1d7d62",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x01139EdF0Cca71fd0A0e59C694332a68Dc10a3f4",
+      "txHash": "0x9cbf477e5fdc1f2ecaeb0bc0830d9826d5eb642de6fb54f1c2f1e16c0467e419",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "f9da3121c9088d832f4274a6b296980403412e80ed350250ad609d57f71443ab": {
+      "address": "0xE0d890590B2d3f9914628C7CC62DeDEddDfe5Fa5",
+      "txHash": "0x51ecf7dc26aaab5aca0c3bcbff2e3c04f3a3fd73b5eb55ec440d00a14c311cfd",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "ADMIN_ROLE",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:24"
+          },
+          {
+            "label": "MINIMUM_AMOUNT",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:25"
+          },
+          {
+            "label": "roundLength",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:26"
+          },
+          {
+            "label": "nft",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(PledgePostERC721)5941",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:28"
+          },
+          {
+            "label": "authorArticles",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_array(t_struct(Article)6156_storage)dyn_storage)",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:31"
+          },
+          {
+            "label": "authorTotalDonations",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:33"
+          },
+          {
+            "label": "articleDonators",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_array(t_address)dyn_storage))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:35"
+          },
+          {
+            "label": "roundArticles",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Article)6156_storage)dyn_storage)",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:37"
+          },
+          {
+            "label": "authorToArticleIdToRound",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(Round)6175_storage))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:39"
+          },
+          {
+            "label": "applicationStatusForRound",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_enum(ApplicationStatus)6179)))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:42"
+          },
+          {
+            "label": "SqrtSumRoundDonation",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_uint256)))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:47"
+          },
+          {
+            "label": "matchingAmounts",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_mapping(t_uint256,t_uint256)))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:51"
+          },
+          {
+            "label": "rounds",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_array(t_struct(Round)6175_storage)dyn_storage",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:55"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)324_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)333_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)324_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)446_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)396_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)324_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Article)6156_storage)dyn_storage": {
+            "label": "struct IPledgePost.Article[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Round)6175_storage)dyn_storage": {
+            "label": "struct IPledgePost.Round[]",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_contract(PledgePostERC721)5941": {
+            "label": "contract PledgePostERC721",
+            "numberOfBytes": "20"
+          },
+          "t_enum(ApplicationStatus)6179": {
+            "label": "enum IPledgePost.ApplicationStatus",
+            "members": [
+              "Pending",
+              "Accepted",
+              "Denied"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_array(t_struct(Article)6156_storage)dyn_storage)": {
+            "label": "mapping(address => struct IPledgePost.Article[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_array(t_address)dyn_storage))": {
+            "label": "mapping(address => mapping(uint256 => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_enum(ApplicationStatus)6179)))": {
+            "label": "mapping(address => mapping(uint256 => mapping(uint256 => enum IPledgePost.ApplicationStatus)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(address => mapping(uint256 => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(Round)6175_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct IPledgePost.Round))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Article)6156_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct IPledgePost.Article[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_enum(ApplicationStatus)6179)": {
+            "label": "mapping(uint256 => enum IPledgePost.ApplicationStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(uint256 => mapping(address => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_enum(ApplicationStatus)6179))": {
+            "label": "mapping(uint256 => mapping(uint256 => enum IPledgePost.ApplicationStatus))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(uint256 => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Round)6175_storage)": {
+            "label": "mapping(uint256 => struct IPledgePost.Round)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Article)6156_storage": {
+            "label": "struct IPledgePost.Article",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address_payable",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "content",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "donationsReceived",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Round)6175_storage": {
+            "label": "struct IPledgePost.Round",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "name",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "description",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "poolAddress",
+                "type": "t_address_payable",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "poolAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "startDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "endDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "isActive",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "8"
+              }
+            ],
+            "numberOfBytes": "288"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)324_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "c057a341a76a28d6bce4cf49af7dff032a9c509c5bde6015f8c53e1da3dea402": {
+      "address": "0xdEA8FF3777D09Ad65Cc068A0aDAAA5F7d89658a0",
+      "txHash": "0x0bd270f7fba47a98c291c0b3672a71696e91bdf4c57f5f0b4903f83f4f5b3e92",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "ADMIN_ROLE",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:24"
+          },
+          {
+            "label": "MINIMUM_AMOUNT",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:25"
+          },
+          {
+            "label": "roundLength",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:26"
+          },
+          {
+            "label": "nft",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(PledgePostERC721)5445",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:28"
+          },
+          {
+            "label": "authorArticles",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_array(t_struct(Article)5548_storage)dyn_storage)",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:31"
+          },
+          {
+            "label": "authorTotalDonations",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:33"
+          },
+          {
+            "label": "articleDonators",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_array(t_address)dyn_storage))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:35"
+          },
+          {
+            "label": "roundArticles",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Article)5548_storage)dyn_storage)",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:37"
+          },
+          {
+            "label": "authorToArticleIdToRound",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(Round)5567_storage))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:39"
+          },
+          {
+            "label": "applicationStatusForRound",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_enum(ApplicationStatus)5571)))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:42"
+          },
+          {
+            "label": "SqrtSumRoundDonation",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_uint256)))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:47"
+          },
+          {
+            "label": "matchingAmounts",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_mapping(t_uint256,t_uint256)))",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:51"
+          },
+          {
+            "label": "rounds",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_array(t_struct(Round)5567_storage)dyn_storage",
+            "contract": "PledgePost",
+            "src": "contracts/PledgePost.sol:55"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)25_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)34_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)147_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)97_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)25_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Article)5548_storage)dyn_storage": {
+            "label": "struct IPledgePost.Article[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(Round)5567_storage)dyn_storage": {
+            "label": "struct IPledgePost.Round[]",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_contract(PledgePostERC721)5445": {
+            "label": "contract PledgePostERC721",
+            "numberOfBytes": "20"
+          },
+          "t_enum(ApplicationStatus)5571": {
+            "label": "enum IPledgePost.ApplicationStatus",
+            "members": [
+              "Pending",
+              "Accepted",
+              "Denied"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_array(t_struct(Article)5548_storage)dyn_storage)": {
+            "label": "mapping(address => struct IPledgePost.Article[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_array(t_address)dyn_storage))": {
+            "label": "mapping(address => mapping(uint256 => address[]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_enum(ApplicationStatus)5571)))": {
+            "label": "mapping(address => mapping(uint256 => mapping(uint256 => enum IPledgePost.ApplicationStatus)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(address => mapping(uint256 => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(Round)5567_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct IPledgePost.Round))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_address)dyn_storage)": {
+            "label": "mapping(uint256 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Article)5548_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct IPledgePost.Article[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_enum(ApplicationStatus)5571)": {
+            "label": "mapping(uint256 => enum IPledgePost.ApplicationStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_mapping(t_uint256,t_uint256)))": {
+            "label": "mapping(uint256 => mapping(address => mapping(uint256 => uint256)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_enum(ApplicationStatus)5571))": {
+            "label": "mapping(uint256 => mapping(uint256 => enum IPledgePost.ApplicationStatus))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(uint256 => mapping(uint256 => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Round)5567_storage)": {
+            "label": "mapping(uint256 => struct IPledgePost.Round)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Article)5548_storage": {
+            "label": "struct IPledgePost.Article",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "author",
+                "type": "t_address_payable",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "content",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "donationsReceived",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Round)5567_storage": {
+            "label": "struct IPledgePost.Round",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "name",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "description",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "poolAddress",
+                "type": "t_address_payable",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "poolAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "startDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "endDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              },
+              {
+                "label": "isActive",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "8"
+              }
+            ],
+            "numberOfBytes": "288"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)25_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
