@@ -4,15 +4,13 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
-
 contract PledgePostERC721 is ERC721, Ownable {
     uint256 private _nextTokenId;
     struct TokenData {
         address minterAddress;
         address authorAddress;
         uint256 articleId;
-        bytes contentURI;
+        string contentURI;
     }
     mapping(uint256 => TokenData) private _tokenData;
 
@@ -24,11 +22,11 @@ contract PledgePostERC721 is ERC721, Ownable {
         address minterAddress,
         address authorAddress,
         uint256 articleId,
-        bytes calldata contentURI
+        string calldata contentURI
     ) external onlyOwner {
         require(minterAddress != address(0), "Minter address is zero");
         require(authorAddress != address(0), "Author address is zero");
-        require(contentURI.length > 0, "ContentURI is empty");
+        require(bytes(contentURI).length > 0, "Content URI is empty");
 
         uint256 tokenId = _nextTokenId++;
         _safeMint(minterAddress, tokenId);

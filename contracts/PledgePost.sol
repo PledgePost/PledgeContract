@@ -11,7 +11,6 @@ import {PledgePostERC721} from "./PledgePostERC721.sol";
 import {Sqrt} from "./libraries/Sqrt.sol";
 
 // interfaces
-import "./interface/IPledgePostERC721.sol";
 import "./interface/IPledgePost.sol";
 import "./interface/IPoolContract.sol";
 
@@ -86,8 +85,8 @@ contract PledgePost is
         revokeRole(ADMIN_ROLE, _admin);
     }
 
-    function postArticle(bytes calldata _content) external {
-        require(_content.length > 0, "Content cannot be empty");
+    function postArticle(string calldata _content) external {
+        require(bytes(_content).length > 0, "Content cannot be empty");
         uint articleId = authorArticles[msg.sender].length;
         Article memory newArticle = Article({
             id: articleId,
@@ -103,7 +102,7 @@ contract PledgePost is
 
     function updateArticle(
         uint256 _articleId,
-        bytes calldata _content
+        string calldata _content
     ) external {
         require(
             msg.sender == authorArticles[msg.sender][_articleId].author,
@@ -232,7 +231,7 @@ contract PledgePost is
         address payable pool = _createPool(_name, _startDate, _endDate);
         Round memory newRound = Round({
             id: roundLength + 1,
-            owner: msg.sender,
+            owner: msg.sender, // TODO: change round owner
             name: _name,
             description: _description,
             poolAddress: pool,
@@ -370,6 +369,17 @@ contract PledgePost is
     ) external view returns (Article memory) {
         require(roundArticles[_roundId].length > 0, "No articles in round");
         return roundArticles[_roundId][_index];
+    }
+
+    function getDonatedAmount(
+        address _author,
+        uint256 _articleId
+    ) public view returns (uint256) {
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
+        return authorArticles[_author][_articleId].donationsReceived;
     }
 
     function getAuthorArticle(

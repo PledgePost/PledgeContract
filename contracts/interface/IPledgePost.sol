@@ -5,7 +5,7 @@ interface IPledgePost {
     struct Article {
         uint256 id;
         address payable author;
-        bytes content; // IPFS hash
+        string content; // IPFS hash
         uint256 donationsReceived;
     }
     struct Round {
@@ -26,7 +26,7 @@ interface IPledgePost {
     }
     event ArticlePosted(
         address indexed author,
-        bytes content,
+        string content,
         uint256 articleId
     );
     event ArticleDonated(
@@ -63,11 +63,11 @@ interface IPledgePost {
 
     function removeAdmin(address _admin) external;
 
-    function postArticle(bytes calldata _content) external;
+    function postArticle(string calldata _content) external;
 
     function updateArticle(
         uint256 _articleId,
-        bytes calldata _content
+        string calldata _content
     ) external;
 
     function donateToArticle(
@@ -118,6 +118,11 @@ interface IPledgePost {
 
     function getAllocation(
         uint256 _roundId,
+        address _author,
+        uint256 _articleId
+    ) external view returns (uint256);
+
+    function getDonatedAmount(
         address _author,
         uint256 _articleId
     ) external view returns (uint256);
