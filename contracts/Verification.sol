@@ -54,7 +54,7 @@ contract EASVerification {
             (uint256, uint32, uint8)
         );
 
-        decodedScore = score / 10 ** 18;
+        decodedScore = score / 10 ** score_decimals;
         return decodedScore;
     }
 }
