@@ -12,6 +12,15 @@ contract EASVerification {
         eas = _eas;
     }
 
+    function checkScore(
+        bytes32 uid, // uid of the attestation
+        address recipient,
+        uint256 score
+    ) public view returns (bool) {
+        uint256 attestationScore = getPassportAttestation(uid, recipient);
+        return attestationScore >= score;
+    }
+
     function getPassportAttestation(
         bytes32 uid, // uid of the attestation
         address recipient //
