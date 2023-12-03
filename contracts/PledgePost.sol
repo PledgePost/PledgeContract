@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Attestation} from "@ethereum-attestation-service/eas-contracts/contracts/Common.sol";
 
 // internal contracts
 import {PoolContract} from "./PoolContract.sol";
@@ -13,6 +14,7 @@ import {Sqrt} from "./libraries/Sqrt.sol";
 // interfaces
 import "./interface/IPledgePost.sol";
 import "./interface/IPoolContract.sol";
+import {IEAS} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
 
 contract PledgePost is
     IPledgePost,
@@ -25,6 +27,7 @@ contract PledgePost is
     uint256 roundLength;
 
     PledgePostERC721 private nft;
+    IEAS public eas;
 
     // author => articles
     mapping(address => Article[]) private authorArticles;
@@ -59,11 +62,14 @@ contract PledgePost is
         _disableInitializers();
     }
 
-    function initialize(address _owner) external initializer {
+    function initialize(address _owner /*, IEAS _eas */) external initializer {
         // initialize owner of contract
         __Ownable_init(_owner);
         // initialize admin role
         __AccessControl_init();
+
+        // initialize eas
+        // eas = _eas;
         ADMIN_ROLE = keccak256("ADMIN_ROLE");
         _grantRole(ADMIN_ROLE, _owner);
 
@@ -438,5 +444,51 @@ contract PledgePost is
         uint256 _articleId
     ) public view returns (bool) {
         return nft.checkOwner(_sender, _author, _articleId);
+    }
+
+    function checkScore(
+        bytes32 uid, // uid of the attestation
+        address recipient,
+        uint256 score
+    ) public view returns (bool) {
+        uint256 attestationScore = getPassportAttestation(uid, recipient);
+        return attestationScore >= score;
+    }
+
+    function getPassportAttestation(
+        bytes32 uid, // uid of the attestation
+        address recipient //
+    ) public view returns (uint256 score) {
+        // check if attestation exists
+        require(eas.isAttestationValid(uid), "Attestation is not valid");
+
+        Attestation memory attestation = eas.getAttestation(uid);
+        // check if the address is the recipient of the attestation
+        require(
+            attestation.recipient == recipient,
+            "Invalid recipient of attestation"
+        );
+        bytes memory encodedData = attestation.data;
+        score = decodeScore(encodedData);
+
+        // check if score is valid on core contract
+        // just return score
+        return score;
+    }
+
+    function decodeScore(
+        bytes memory encodedData
+    ) internal pure returns (uint256 decodedScore) {
+        uint256 score;
+        uint32 scorer_id;
+        uint8 score_decimals;
+
+        (score, scorer_id, score_decimals) = abi.decode(
+            encodedData,
+            (uint256, uint32, uint8)
+        );
+
+        decodedScore = score / 10 ** 18;
+        return decodedScore;
     }
 }
