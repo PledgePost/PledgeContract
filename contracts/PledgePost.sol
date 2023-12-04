@@ -62,6 +62,8 @@ contract PledgePost is
         _disableInitializers();
     }
 
+    // - initialize: This function initializes the contract with the owner's address and sets up the admin role.
+    // It also sets the minimum donation amount and initializes the NFT contract.
     function initialize(address _owner /*, IEAS _eas */) external initializer {
         // initialize owner of contract
         __Ownable_init(_owner);
@@ -85,6 +87,11 @@ contract PledgePost is
         _;
     }
 
+    // - changeMinimumAmount: This function allows the owner to change the minimum donation amount.
+    function changeMinimumAmount(uint256 _amount) external onlyOwner {
+        MINIMUM_AMOUNT = _amount;
+    }
+
     function addAdmin(address _admin) external onlyOwner {
         _grantRole(ADMIN_ROLE, _admin);
     }
@@ -97,6 +104,7 @@ contract PledgePost is
         revokeRole(ADMIN_ROLE, _admin);
     }
 
+    // - postArticle: This function allows a user to post an article.
     function postArticle(string calldata _content) external {
         require(bytes(_content).length > 0, "Content cannot be empty");
         uint articleId = authorArticles[msg.sender].length;
@@ -112,6 +120,7 @@ contract PledgePost is
         emit ArticlePosted(msg.sender, _content, articleId);
     }
 
+    // - updateArticle: This function allows the author of an article to update its contentId.
     function updateArticle(
         uint256 _articleId,
         string calldata _content
@@ -129,6 +138,7 @@ contract PledgePost is
         article.content = _content;
     }
 
+    // - donateToArticle: This function allows a user to donate to an article.
     function donateToArticle(
         address payable _author,
         uint256 _articleId
@@ -166,6 +176,7 @@ contract PledgePost is
         nft.safeMint(msg.sender, _author, _articleId, article.content);
     }
 
+    // - applyForRound: This function allows an author to apply their article for a funding round.
     function applyForRound(uint256 _roundId, uint256 _articleId) external {
         Article storage article = authorArticles[msg.sender][_articleId];
         require(
@@ -227,12 +238,14 @@ contract PledgePost is
     }
 
     // TODO: add matching cap
+    // - createRound: This function allows an admin to create a new funding round.
     function createRound(
         bytes calldata _name,
         bytes calldata _description,
         uint256 _startDate,
         uint256 _endDate
     ) external onlyAdmin {
+        // TODO: fix date validation
         require(_startDate < _endDate, "Start date must be before end date");
         // require(
         //     _startDate > block.timestamp,
@@ -281,8 +294,20 @@ contract PledgePost is
         round.isActive = false;
     }
 
-    function changeMinimumAmount(uint256 _amount) external onlyOwner {
-        MINIMUM_AMOUNT = _amount;
+    // deposit should be done via deposit function
+    function deposit(uint256 _roundId) external payable returns (bool) {
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+        require(
+            address(msg.sender).balance >= msg.value,
+            "Not enough balance to deposit"
+        );
+        Round storage round = rounds[_roundId - 1];
+        address pool = address(IPoolContract(round.poolAddress));
+        (bool sent, ) = payable(pool).call{value: msg.value}("");
+        require(sent, "Failed to deposit Ether");
+        round.poolAmount += msg.value;
+        return sent;
     }
 
     // get sum of sqrt x
@@ -313,39 +338,7 @@ contract PledgePost is
         }
     }
 
-    // deposit should be done via deposit function
-    function deposit(uint256 _roundId) external payable returns (bool) {
-        require(_roundId <= roundLength, "Round does not exist");
-        require(_roundId > 0, "RoundId 0 does not exist");
-        require(
-            address(msg.sender).balance >= msg.value,
-            "Not enough balance to deposit"
-        );
-        Round storage round = rounds[_roundId - 1];
-        address pool = address(IPoolContract(round.poolAddress));
-        (bool sent, ) = payable(pool).call{value: msg.value}("");
-        require(sent, "Failed to deposit Ether");
-        round.poolAmount += msg.value;
-        return sent;
-    }
-
-    function getTotalSquareSqrtSum(
-        uint256 _roundId
-    ) public view returns (uint256) {
-        uint256 totalSquareSqrtSum = 0;
-        for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
-            require(roundArticles[_roundId].length > 0, "No articles in round");
-            Article storage article = roundArticles[_roundId][i];
-            uint256 sqrtSum = getSqrtSumRoundDonation(
-                article.author,
-                article.id,
-                _roundId
-            );
-            totalSquareSqrtSum += sqrtSum ** 2;
-        }
-        return totalSquareSqrtSum;
-    }
-
+    // - getMatchingAmount: This function calculates the matching amount for an article in a round.
     function getMatchingAmount(
         uint256 _roundId,
         address _author,
@@ -363,6 +356,26 @@ contract PledgePost is
         return matching;
     }
 
+    // - getTotalSquareSqrtSum: This function calculates the total square root sum of donations for all articles in a round.
+    function getTotalSquareSqrtSum(
+        uint256 _roundId
+    ) public view returns (uint256) {
+        uint256 totalSquareSqrtSum = 0;
+        for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
+            require(roundArticles[_roundId].length > 0, "No articles in round");
+            Article storage article = roundArticles[_roundId][i];
+            uint256 sqrtSum = getSqrtSumRoundDonation(
+                article.author,
+                article.id,
+                _roundId
+            );
+            totalSquareSqrtSum += sqrtSum ** 2;
+        }
+        return totalSquareSqrtSum;
+    }
+
+    // - getAllocation: This function returns the allocation for an article in a round.
+    // this function is only available after the round has ended
     function getAllocation(
         uint256 _roundId,
         address _author,
@@ -383,6 +396,7 @@ contract PledgePost is
         return roundArticles[_roundId][_index];
     }
 
+    // - getDonatedAmount: This function returns the total amount donated to an article.
     function getDonatedAmount(
         address _author,
         uint256 _articleId
@@ -394,6 +408,7 @@ contract PledgePost is
         return authorArticles[_author][_articleId].donationsReceived;
     }
 
+    // - getAuthorArticle: This function returns an article by a given author.
     function getAuthorArticle(
         address _author,
         uint256 _articleId
@@ -401,6 +416,7 @@ contract PledgePost is
         return authorArticles[_author][_articleId];
     }
 
+    // - getAllAuthorArticle: This function returns all articles by a given author.
     function getAllAuthorArticle(
         address _author
     ) external view returns (Article[] memory) {
@@ -418,10 +434,12 @@ contract PledgePost is
         return roundLength;
     }
 
+    // - getRound: This function returns a round by its ID.
     function getRound(uint256 _roundId) public view returns (Round memory) {
         return rounds[_roundId - 1];
     }
 
+    // -getSqrtSumRoundDonation : This function returns the sum of sqrt of donations for each article in a round.
     function getSqrtSumRoundDonation(
         address _author,
         uint256 _articleId,
@@ -438,6 +456,8 @@ contract PledgePost is
         return applicationStatusForRound[_author][_articleId][_roundId];
     }
 
+    // - checkOwner: This function checks if a given address has donated to a given article.
+    // donation is represented by an NFT
     function checkOwner(
         address _sender,
         address _author,
@@ -446,6 +466,7 @@ contract PledgePost is
         return nft.checkOwner(_sender, _author, _articleId);
     }
 
+    // - checkScore: This function checks if a given address has a score greater than or equal to a given score.
     function checkScore(
         bytes32 uid, // uid of the attestation
         address recipient,
@@ -455,6 +476,7 @@ contract PledgePost is
         return attestationScore >= score;
     }
 
+    // - getPassportAttestation: This function returns the score of an attestation.
     function getPassportAttestation(
         bytes32 uid, // uid of the attestation
         address recipient //
