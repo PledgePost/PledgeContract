@@ -30,17 +30,23 @@ contract PledgePost is
     IEAS public eas;
 
     // author => articles
+    // track articles by author
     mapping(address => Article[]) private authorArticles;
     // author => totalDonations
+    // track total donations by author
     mapping(address => uint256) private authorTotalDonations;
     // author => articleId => donators
+    // track donators by article
     mapping(address => mapping(uint256 => address[])) private articleDonators;
     // Round.id => Article[]
+    // track articles by round
     mapping(uint256 => Article[]) private roundArticles;
     // author => Article.id => Round
+    // track round that article has applied for
     mapping(address => mapping(uint256 => Round))
         private authorToArticleIdToRound;
     // author => Article.id => Round.id => ApplicationStatus
+    // track application status for each round
     mapping(address => mapping(uint256 => mapping(uint256 => ApplicationStatus)))
         private applicationStatusForRound;
 
@@ -50,6 +56,7 @@ contract PledgePost is
         private SqrtSumRoundDonation;
 
     // round.id => author => article.id => amount
+    // matching amount for each article
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         private matchingAmounts;
 
@@ -406,6 +413,14 @@ contract PledgePost is
             "Article does not exist"
         );
         return authorArticles[_author][_articleId].donationsReceived;
+    }
+
+    // - getArticleDonators: This function returns the list of donators for an article.
+    function getArticleDonators(
+        address _author,
+        uint256 _articleId
+    ) external view returns (address[] memory) {
+        return articleDonators[_author][_articleId];
     }
 
     // - getAuthorArticle: This function returns an article by a given author.
