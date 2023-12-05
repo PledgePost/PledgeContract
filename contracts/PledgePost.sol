@@ -174,7 +174,12 @@ contract PledgePost is
         // check if author has applied for round
         // if yes, add amount
         Round storage round = authorToArticleIdToRound[_author][_articleId];
-        if (round.id >= 0 && round.isActive) {
+        if (
+            round.id >= 0 &&
+            round.isActive &&
+            applicationStatusForRound[_author][_articleId][round.id] ==
+            ApplicationStatus.Accepted
+        ) {
             SqrtSumRoundDonation[_author][_articleId][round.id] += Sqrt.sqrt(
                 msg.value
             );
@@ -199,8 +204,12 @@ contract PledgePost is
             _articleId < authorArticles[msg.sender].length,
             "Article does not exist"
         );
+
         authorToArticleIdToRound[msg.sender][_articleId] = round;
         roundArticles[_roundId].push(article);
+        applicationStatusForRound[msg.sender][_articleId][
+            _roundId
+        ] = ApplicationStatus.Pending;
 
         emit RoundApplied(msg.sender, _articleId, _roundId);
     }
@@ -211,6 +220,11 @@ contract PledgePost is
         address _author,
         uint256 _articleId
     ) external onlyAdmin {
+        require(
+            applicationStatusForRound[_author][_articleId][_roundId] ==
+                ApplicationStatus.Pending,
+            "Application status is not Pending"
+        );
         applicationStatusForRound[_author][_articleId][
             _roundId
         ] = ApplicationStatus.Accepted;

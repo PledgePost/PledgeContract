@@ -105,6 +105,44 @@ describe("Contract Test", () => {
       await contract.addAdmin(addr1.address);
       expect(await contract.checkAdminRole(addr1.address)).to.equal(true);
     });
+    it("should accept application", async () => {
+      await contract.createRound(
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
+        1699509663,
+        1702101663
+      );
+      await contract.activateRound(1);
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
+      await contract.applyForRound(1, 0);
+      await contract.acceptApplication(1, owner.address, 0);
+      expect(await contract.getApplicationStatus(1, owner.address, 0)).to.equal(
+        1
+      );
+    });
+    it("should reject application", async () => {
+      await contract.createRound(
+        ethers.toUtf8Bytes("Initial Round"),
+        ethers.toUtf8Bytes(
+          "This is the first round of the PledgePost! Enjoy to write something awesome!"
+        ),
+        1699509663,
+        1702101663
+      );
+      await contract.activateRound(1);
+      await contract.postArticle(
+        "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
+      );
+      await contract.applyForRound(1, 0);
+      await contract.denyApplication(1, owner.address, 0);
+      expect(await contract.getApplicationStatus(1, owner.address, 0)).to.equal(
+        2
+      );
+    });
   });
   describe("QF related tests", () => {
     it("total donation should be 100", async () => {
@@ -145,6 +183,7 @@ describe("Contract Test", () => {
       });
       await contract.activateRound(1);
       await contract.applyForRound(1, 0);
+      await contract.acceptApplication(1, owner.address, 0);
       await contract.connect(addr1).donateToArticle(owner.address, 0, {
         value: ethers.parseEther("100"),
       });
@@ -185,6 +224,7 @@ describe("Contract Test", () => {
         .connect(addr1)
         .donateToArticle(owner.address, 0, { value: ethers.parseEther("100") });
       await contract.applyForRound(1, 0);
+      await contract.acceptApplication(1, owner.address, 0);
       await contract
         .connect(addr1)
         .donateToArticle(owner.address, 0, { value: ethers.parseEther("100") });
@@ -251,6 +291,13 @@ describe("Contract Test", () => {
       await contract.connect(addr3).applyForRound(1, 0);
       await contract.connect(addr3).applyForRound(1, 1);
       await contract.applyForRound(1, 0);
+
+      // accept application
+      await contract.acceptApplication(1, owner.address, 0);
+      await contract.acceptApplication(1, addr1.address, 0);
+      await contract.acceptApplication(1, addr2.address, 0);
+      await contract.acceptApplication(1, addr3.address, 0);
+      await contract.acceptApplication(1, addr3.address, 1);
 
       await contract.connect(addr4).donateToArticle(addr1.address, 0, {
         value: ethers.parseEther("1000"),
