@@ -171,8 +171,9 @@ contract PledgePost is
         article.donationsReceived += msg.value;
         authorTotalDonations[_author] += msg.value;
 
-        // check if author has applied for round
-        // if yes, add amount
+        // check if author has applied for round and accepted
+        // check if round is active
+        // if yes, add amount to sum of sqrt of donations
         Round storage round = authorToArticleIdToRound[_author][_articleId];
         if (
             round.id >= 0 &&
