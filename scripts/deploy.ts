@@ -86,7 +86,7 @@ npx hardhat run scripts/deploy.ts --network scrollSepolia
 /*
 npx hardhat verify --network goerli 0xE0d890590B2d3f9914628C7CC62DeDEddDfe5Fa5
 npx hardhat verify --network sepolia 0x298005746ff8C64252c1398e24eA5C17541db1B5
-npx hardhat verify --network optimismGoerli 0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa
+npx hardhat verify --network optimismGoerli 0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589
 npx hardhat verify --network polygonMumbai 0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa
 npx hardhat verify --network polygonZkEvmTestnet 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
 npx hardhat verify --network scrollSepolia 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f

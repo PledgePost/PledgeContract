@@ -9,16 +9,17 @@ async function main() {
 
   console.log("Contract deployed to:", await contract.getAddress());
 }
+
 async function upgrade() {
   const ContractFactory = await ethers.getContractFactory("PledgePost");
   const contract = await upgrades.upgradeProxy(
-    "0x01139EdF0Cca71fd0A0e59C694332a68Dc10a3f4",
+    "0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589",
     ContractFactory
   );
   console.log("implementation upgraded to:", await contract.getAddress());
 }
 async function initialize() {
-  let contractAddress = "0x01139EdF0Cca71fd0A0e59C694332a68Dc10a3f4";
+  let contractAddress = "0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589";
 
   const contract = await ethers.getContractAt("PledgePost", contractAddress);
 
@@ -26,10 +27,22 @@ async function initialize() {
   await tx1.wait();
   console.log(`Article posted`);
 }
+async function addAdmin() {
+  let contractAddress = "0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589";
+
+  const contract = await ethers.getContractAt("PledgePost", contractAddress);
+
+  const tx1 = await contract.addAdmin(
+    "0x06aa005386F53Ba7b980c61e0D067CaBc7602a62"
+  );
+  await tx1.wait();
+  console.log(`Admin added`);
+}
 
 // main()
-initialize()
-  // upgrade()
+// initialize()
+// upgrade()
+addAdmin()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

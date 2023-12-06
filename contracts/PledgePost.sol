@@ -247,7 +247,7 @@ contract PledgePost is
     }
 
     function _createPool(
-        bytes calldata _name,
+        string calldata _name,
         uint256 _startDate,
         uint256 _endDate
     ) internal returns (address payable poolAddress) {
@@ -262,8 +262,8 @@ contract PledgePost is
     // TODO: add matching cap
     // - createRound: This function allows an admin to create a new funding round.
     function createRound(
-        bytes calldata _name,
-        bytes calldata _description,
+        string calldata _name,
+        string calldata _description,
         uint256 _startDate,
         uint256 _endDate
     ) external onlyAdmin {
@@ -279,8 +279,8 @@ contract PledgePost is
         Round memory newRound = Round({
             id: roundLength + 1,
             owner: msg.sender, // TODO: change round owner
-            name: _name,
-            description: _description,
+            name: bytes(_name),
+            description: bytes(_description),
             poolAddress: pool,
             poolAmount: 0,
             startDate: _startDate,
@@ -292,7 +292,7 @@ contract PledgePost is
             msg.sender,
             pool,
             roundLength + 1,
-            _name,
+            bytes(_name),
             _startDate,
             _endDate
         );

@@ -90,8 +90,8 @@ interface IPledgePost {
     ) external;
 
     function createRound(
-        bytes calldata _name,
-        bytes calldata _description,
+        string calldata _name,
+        string calldata _description,
         uint256 _startDate,
         uint256 _endDate
     ) external;
