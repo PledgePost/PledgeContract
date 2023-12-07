@@ -293,6 +293,7 @@ contract PledgePost is
             pool,
             roundLength + 1,
             bytes(_name),
+            bytes(_description),
             _startDate,
             _endDate
         );

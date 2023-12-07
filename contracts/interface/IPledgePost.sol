@@ -40,6 +40,7 @@ interface IPledgePost {
         address ipoolAddress,
         uint256 roundId,
         bytes name,
+				bytes description,
         uint256 startDate,
         uint256 endDate
     );
