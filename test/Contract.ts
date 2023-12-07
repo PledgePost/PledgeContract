@@ -15,6 +15,7 @@ describe("Contract Test", () => {
     const ContractFactory = await ethers.getContractFactory("PledgePost");
     const contract = await upgrades.deployProxy(ContractFactory, [
       owner.address,
+      ethers.parseEther("0.0005"),
     ]);
     return contract;
   }
@@ -62,7 +63,7 @@ describe("Contract Test", () => {
     });
 
     it("should apply round", async () => {
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -79,7 +80,7 @@ await contract.createRound(
       );
     });
     it("should deposit", async () => {
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -100,7 +101,7 @@ await contract.createRound(
       expect(await contract.checkAdminRole(addr1.address)).to.equal(true);
     });
     it("should accept application", async () => {
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -117,7 +118,7 @@ await contract.createRound(
       );
     });
     it("should reject application", async () => {
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -136,7 +137,7 @@ await contract.createRound(
   });
   describe("QF related tests", () => {
     it("total donation should be 100", async () => {
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -155,7 +156,7 @@ await contract.createRound(
       );
     });
     it("should donate within round", async () => {
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -194,7 +195,7 @@ await contract.createRound(
 
     it("should Allocate", async () => {
       const contract = await deployContract();
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
@@ -237,7 +238,7 @@ await contract.createRound(
     });
     it("should allocate multiple article", async () => {
       const contract = await deployContract();
-await contract.createRound(
+      await contract.createRound(
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,

@@ -4,6 +4,7 @@ async function main() {
   const ContractFactory = await ethers.getContractFactory("PledgePost");
   const contract = await upgrades.deployProxy(ContractFactory, [
     "0x9B789cc315F1eedFbCBE759DEbb5a3D5D41B788f",
+    ethers.parseEther("0.0005"),
   ]);
   await contract.waitForDeployment();
 

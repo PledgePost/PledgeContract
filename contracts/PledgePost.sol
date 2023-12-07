@@ -71,7 +71,10 @@ contract PledgePost is
 
     // - initialize: This function initializes the contract with the owner's address and sets up the admin role.
     // It also sets the minimum donation amount and initializes the NFT contract.
-    function initialize(address _owner /*, IEAS _eas */) external initializer {
+    function initialize(
+        address _owner,
+        uint256 _MINIMUM_AMOUNT /*, IEAS _eas */
+    ) external initializer {
         // initialize owner of contract
         __Ownable_init(_owner);
         // initialize admin role
@@ -83,7 +86,8 @@ contract PledgePost is
         _grantRole(ADMIN_ROLE, _owner);
 
         // initialize variables
-        MINIMUM_AMOUNT = 0.0005 ether;
+        // 500000000000000000 wei = 0.0005 ether
+        MINIMUM_AMOUNT = _MINIMUM_AMOUNT;
         roundLength = 0;
 
         nft = new PledgePostERC721(address(this));

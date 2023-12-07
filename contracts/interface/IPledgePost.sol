@@ -40,7 +40,7 @@ interface IPledgePost {
         address ipoolAddress,
         uint256 roundId,
         bytes name,
-				bytes description,
+        bytes description,
         uint256 startDate,
         uint256 endDate
     );
@@ -56,7 +56,7 @@ interface IPledgePost {
         uint256 amount
     );
 
-    function initialize(address _owner) external;
+    function initialize(address _owner, uint256 _MINIMUM_AMOUNT) external;
 
     function addAdmin(address _admin) external;
 
