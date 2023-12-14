@@ -9,4 +9,4 @@
   - etc...
 - PoolContract.sol: pool contract deployed for each grant
 - PledgePostERC721.sol: ERC721 contract to proof of donation (will be changed to Hypercert)
-- Verification.sol: verify Gitcoin Passport score onchain(Ethereum Attestation Service)
+- Verification.sol: verify Gitcoin Passport score onchain(Ethereum Attestation Service). integrated into PledgePost.sol contract
