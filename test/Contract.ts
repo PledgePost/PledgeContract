@@ -57,7 +57,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       expect(await contract.getRoundLength()).to.equal(1);
     });
@@ -67,7 +67,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.postArticle(
         "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
@@ -84,7 +84,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.activateRound(1);
       await contract.postArticle(
@@ -105,7 +105,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.activateRound(1);
       await contract.postArticle(
@@ -122,7 +122,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.activateRound(1);
       await contract.postArticle(
@@ -141,7 +141,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.activateRound(1);
       await contract.postArticle(
@@ -160,7 +160,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.postArticle(
         "bafybeia3mjq6a3556emeiqhvtkvhckesulygvuknhfriye4ucvd62yvnuq"
@@ -199,7 +199,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.activateRound(1);
       await contract.postArticle(
@@ -242,7 +242,7 @@ describe("Contract Test", () => {
         "Initial Round",
         "This is the first round of the PledgePost! Enjoy to write something awesome!",
         1699509663,
-        1702101663
+        1734595850
       );
       await contract.activateRound(1);
       // post articles

@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "npx hardhat compile",
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "foundry": "forge test -vvvv"
   },
   "name": "hardhat-project",
   "devDependencies": {
