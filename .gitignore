@@ -8,4 +8,9 @@ typechain-types
 # Hardhat files
 cache
 artifacts
-
+# Foundry files
+out/
+broadcast/
+.forge_cache
+cache_forge/*.json
+cache/solidity-files-cache.json
